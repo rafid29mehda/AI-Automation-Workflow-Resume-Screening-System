@@ -4,6 +4,7 @@ An intelligent, multi-agent workflow automation system that screens resumes usin
 
 [![n8n](https://img.shields.io/badge/n8n-workflow-orange)](https://n8n.io)
 
+[Project Preview](https://share-n8n.net/shared/ssYXdlaUvwMU)
 
 <img width="2746" height="554" alt="image" src="https://github.com/user-attachments/assets/bc9215e5-ca31-49c5-a6b9-ce199413ffe0" />
 
