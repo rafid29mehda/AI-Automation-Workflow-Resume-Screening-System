@@ -1,0 +1,984 @@
+{
+  "name": "Resume Screening System",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-resume",
+        "responseMode": "lastNode",
+        "options": {
+          "responseCode": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d0a12963-42e8-494f-be67-1ea294cdfec6",
+      "name": "Webhook",
+      "webhookId": "webhookId"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        -80
+      ],
+      "id": "511077b8-9a41-48ef-8943-4cccadeb179a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "=define",
+        "text": "={{ $json.text }}\n\nExtract this information in strict JSON format:\n{\n  \"name\": \"full name\",\n  \"email\": \"email@example.com\",\n  \"phone\": \"+1234567890\",\n  \"summary\": \"professional summary\",\n  \"education\": [\n    {\n      \"degree\": \"degree name\",\n      \"institution\": \"university name\",\n      \"graduation_year\": \"year\",\n      \"gpa\": \"if available\"\n    }\n  ],\n  \"experience\": [\n    {\n      \"title\": \"job title\",\n      \"company\": \"company name\",\n      \"duration\": \"2020-2023\",\n      \"responsibilities\": [\"resp1\", \"resp2\"]\n    }\n  ],\n  \"skills\": [\"Python\", \"Machine Learning\"],\n  \"certifications\": [\"cert name\"]\n}\n\nReturn ONLY the JSON object, nothing else.\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert resume parser. Extract structured information from resumes and return valid JSON only. Do not include any explanatory text before or after the JSON."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        304,
+        16
+      ],
+      "id": "dfb13eaf-fa46-412e-8154-aaf92aa10a43",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        304,
+        176
+      ],
+      "id": "57cca3d4-8b21-4757-bb9b-cc40ac8d1c35",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "LaAUY0hTdlnK3pKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "candidates",
+          "mode": "list",
+          "cachedResultName": "candidates"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": 0,
+            "score": 0,
+            "name": "={{ JSON.parse($json.text).name }}",
+            "email": "={{ JSON.parse($json.text).email }}",
+            "phone": "={{ JSON.parse($json.text).phone }}",
+            "summary": "={{ JSON.parse($json.text).summary }}",
+            "education": "={{ JSON.stringify(JSON.parse($json.text).education) }}",
+            "experience": "={{ JSON.stringify(JSON.parse($json.text).experience) }}",
+            "skills": "={{ JSON.stringify(JSON.parse($json.text).skills) }}",
+            "certifications": "={{ JSON.stringify(JSON.parse($json.text).certifications) }}",
+            "parsed_data": "={{ JSON.stringify(JSON.parse($json.text)) }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "education",
+              "displayName": "education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experience",
+              "displayName": "experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "certifications",
+              "displayName": "certifications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "parsed_data",
+              "displayName": "parsed_data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        576,
+        -80
+      ],
+      "id": "0b4f6ddb-b979-4900-abf5-624b9a023ee5",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "6QiF8smpXipZ3AGn",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "job_descriptions",
+          "mode": "list",
+          "cachedResultName": "job_descriptions"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "status",
+              "value": "active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        704,
+        80
+      ],
+      "id": "71b5ade6-0361-498b-bddd-edd012204377",
+      "name": "Get Active Job",
+      "credentials": {
+        "postgres": {
+          "id": "6QiF8smpXipZ3AGn",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        848,
+        176
+      ],
+      "id": "b8c1ffff-3f98-4f80-bdcc-b1bbbbcb0501",
+      "name": "Groq Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "LaAUY0hTdlnK3pKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Analyze candidate skills\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert technical recruiter. Compare candidate skills against job requirements and provide a detailed skills match analysis in JSON format only."
+            },
+            {
+              "type": "=HumanMessagePromptTemplate",
+              "message": "=Job Title: {{ $('Get Active Job').item.json.title }}\n\nRequired Skills: {{ $('Get Active Job').item.json.required_skills.join(', ') }}\n\nPreferred Skills: {{ $('Get Active Job').item.json.preferred_skills.join(', ') }}\n\nCandidate Name: {{ JSON.parse($('Basic LLM Chain').item.json.text).name }}\n\nCandidate Skills: {{ JSON.parse($('Basic LLM Chain').item.json.text).skills.join(', ') }}\n\nCandidate Experience: {{ JSON.parse($('Basic LLM Chain').item.json.text).experience.map(e => e.title + ' at ' + e.company).join('; ') }}\n\nAnalyze the match between this candidate and the job requirements. Provide:\n1. Match percentage (0-100)\n2. Matched required skills (list)\n3. Missing required skills (list)\n4. Matched preferred skills (list)\n5. Missing preferred skills (list)\n6. Overall assessment\n\nReturn ONLY valid JSON:\n{\n  \"match_percentage\": 0-100,\n  \"matched_required_skills\": [],\n  \"missing_required_skills\": [],\n  \"matched_preferred_skills\": [],\n  \"missing_preferred_skills\": [],\n  \"overall_assessment\": \"brief summary\"\n}\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        848,
+        0
+      ],
+      "id": "0a5e8a15-e3e4-4ad9-a368-6d3af5f7c487",
+      "name": "Skill Matcher Agent"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "candidates",
+          "mode": "list",
+          "cachedResultName": "candidates"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Insert rows in a table').item.json.id }}",
+            "score": "={{ JSON.parse($('Skill Matcher Agent').item.json.text).match_percentage }}",
+            "status": "evaluated"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "education",
+              "displayName": "education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "experience",
+              "displayName": "experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "certifications",
+              "displayName": "certifications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "parsed_data",
+              "displayName": "parsed_data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1120,
+        -80
+      ],
+      "id": "6f2e615e-a148-429c-aca7-731f11413cae",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "6QiF8smpXipZ3AGn",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Provide ranking analysis",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert HR analyst. Provide detailed, explainable ranking and recommendations for candidates with confidence intervals."
+            },
+            {
+              "type": "HumanMessagePromptTemplate",
+              "message": "=Candidate: {{ JSON.parse($('Basic LLM Chain').item.json.text).name }}\n\nMatch Score: {{ JSON.parse($('Skill Matcher Agent').item.json.text).match_percentage }}%\n\nMatched Skills: {{ JSON.parse($('Skill Matcher Agent').item.json.text).matched_required_skills.join(', ') }}\n\nMissing Skills: {{ JSON.parse($('Skill Matcher Agent').item.json.text).missing_required_skills.join(', ') }}\n\nExperience:\n{{ JSON.parse($('Basic LLM Chain').item.json.text).experience.map(e => '- ' + e.title + ' at ' + e.company + ' (' + e.duration + ')').join('\\n') }}\n\nEducation:\n{{ JSON.parse($('Basic LLM Chain').item.json.text).education.map(e => '- ' + e.degree + ' from ' + e.institution).join('\\n') }}\n\nProvide a comprehensive ranking analysis:\n1. Overall score with confidence interval (e.g., \"75-85\")\n2. Top 3 strengths\n3. Top 3 areas for improvement\n4. Interview recommendation (Strong Yes / Yes / Maybe / No)\n5. Detailed reasoning\n\nReturn ONLY valid JSON:\n{\n  \"overall_score\": 0-100,\n  \"confidence_low\": 0-100,\n  \"confidence_high\": 0-100,\n  \"strengths\": [\"strength1\", \"strength2\", \"strength3\"],\n  \"improvements\": [\"area1\", \"area2\", \"area3\"],\n  \"recommendation\": \"Strong Yes/Yes/Maybe/No\",\n  \"reasoning\": \"detailed explanation\"\n}\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1280,
+        16
+      ],
+      "id": "b4ef4bb8-0316-4274-8904-2e54dea49831",
+      "name": "Ranking Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        176
+      ],
+      "id": "a1c1dd35-3951-49fc-868d-705766f17e1a",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "LaAUY0hTdlnK3pKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "candidates",
+          "mode": "list",
+          "cachedResultName": "candidates"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Insert rows in a table').item.json.id }}",
+            "score": 0,
+            "status": "ranked",
+            "ranking_data": "={{ $json.text.replace(/```json\\n|```\\n|```/g, '').trim() }}",
+            "recommendation": "={{ JSON.parse($json.text.replace(/```json\\n|```\\n|```/g, '').trim()).recommendation }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "education",
+              "displayName": "education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experience",
+              "displayName": "experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "certifications",
+              "displayName": "certifications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "parsed_data",
+              "displayName": "parsed_data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ranking_data",
+              "displayName": "ranking_data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommendation",
+              "displayName": "recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1552,
+        -64
+      ],
+      "id": "ae6ac28d-4874-47d9-8c9e-be22a06abd62",
+      "name": "Store Ranking",
+      "credentials": {
+        "postgres": {
+          "id": "6QiF8smpXipZ3AGn",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        176
+      ],
+      "id": "e427dc1a-1d99-4150-b531-842da223ea58",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "LaAUY0hTdlnK3pKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Generate candidate email",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional HR communications specialist. Write personalized, encouraging emails to candidates about their application status. Keep emails positive, professional, and concise."
+            },
+            {
+              "type": "HumanMessagePromptTemplate",
+              "message": "=Candidate Name: {{ JSON.parse($('Basic LLM Chain').item.json.text).name }}\n\nJob Position: Machine Learning Engineer\n\nMatch Score: {{ JSON.parse($('Skill Matcher Agent').item.json.text.replace(/```/g, '').trim()).match_percentage }}%\n\nRecommendation: {{ JSON.parse($('Ranking Agent').item.json.text.replace(/```/g, '').trim()).recommendation }}\n\nKey Strengths:\n{{ JSON.parse($('Ranking Agent').item.json.text.replace(/```/g, '').trim()).strengths.join('\\n- ') }}\n\nWrite a professional email to the candidate following these guidelines:\n\nIF score >= 70:\n- Thank them for applying\n- Highlight their key strengths (mention 2-3 specific ones)\n- Invite them for an interview with our HR team\n- Provide next steps: \"We will contact you within 3-5 business days to schedule an interview\"\n- Express enthusiasm about their profile\n\nIF score 50-69:\n- Thank them for their application\n- Acknowledge their relevant experience and skills\n- Mention we will keep their profile for future opportunities\n- Encourage them to apply again in the future\n\nIF score < 50:\n- Thank them sincerely for their interest\n- Appreciate the time they took to apply\n- Politely indicate we're moving forward with other candidates\n- Encourage them to develop their skills and apply again\n\nEmail Format:\n- Start with: \"Dear [First Name],\"\n- Keep it warm and encouraging (3-4 paragraphs)\n- End with: \"Best regards,\\nHR Team\\nAI/ML Department\\n[Company Name]\"\n- DO NOT use subject line\n- DO NOT wrap in code blocks or quotes\n\nReturn ONLY the email body text (no JSON, no quotes, no markdown).\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1712,
+        16
+      ],
+      "id": "6e76e65f-5e39-4343-9adb-9e425f28fe75",
+      "name": "Generate Email"
+    },
+    {
+      "parameters": {
+        "sendTo": "{{ JSON.parse($('Basic LLM Chain').item.json.text).email }}",
+        "subject": "Application Update: Machine Learning Engineer Position",
+        "emailType": "text",
+        "message": "={{ $('Generate Email').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2064,
+        16
+      ],
+      "id": "ea534b6f-e0ab-46ce-a999-417359a75e52",
+      "name": "Send a message",
+      "webhookId": "525a3f33-800c-468f-a84b-8653bed4b5d5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Q3trer0efZO400Ys",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Get Active Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Job": {
+      "main": [
+        [
+          {
+            "node": "Skill Matcher Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Agent": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Skill Matcher Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skill Matcher Agent": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Ranking Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ranking Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ranking Agent": {
+      "main": [
+        [
+          {
+            "node": "Store Ranking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Ranking": {
+      "main": [
+        [
+          {
+            "node": "Generate Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Email": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "ad2abf30-e880-439e-bc88-047bf5df2086",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "instanceId"
+  },
+  "id": "rN0UzxlLnDfnqopdh0-cF",
+  "tags": []
+}
